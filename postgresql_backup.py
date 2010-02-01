@@ -1,4 +1,7 @@
 #!/usr/bin/python
+"""
+A simple script to automate remote PostgreSQL backups
+"""
 
 import os
 import sys
@@ -21,6 +24,7 @@ parser.add_option("-c", "--compression", default="gzip",
 
 
 class Backup(object):
+    """ Base backup class to handle common remote commands """
 
     def __init__(self, host, sudo='', compression='gzip'):
         self.host = host
@@ -55,6 +59,9 @@ class Backup(object):
 
 
 class PostgreSQL(Backup):
+    """
+    PostgreSQL backup class to dump globals and all databases individually
+    """
 
     def run(self):
         self.backup_postgres_globals()
@@ -97,8 +104,7 @@ def main():
         parser.print_usage()
         return -1
     for host in hosts:
-        pg = PostgreSQL(host='postgres@192.168.56.3',
-                        compression=options.compression)
+        pg = PostgreSQL(host=host, compression=options.compression)
         pg.run()
 
 
