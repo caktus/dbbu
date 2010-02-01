@@ -14,9 +14,16 @@ logging.basicConfig(stream=sys.stdout,
                     level=logging.DEBUG)
 
 
-def comm(*args, **kwargs):
-    kwargs['shell'] = True
-    p = subprocess.Popen(*args, **kwargs)
+def build_cmd(*args, **kwargs):
+    if sudo:
+        cmd = as_user() + cmd
+    if tunnel:
+        cmd = cmd + 
+
+
+def comm(cmd, build=True, **kwargs):
+    cmd = build_cmd(cmd)
+    p = subprocess.Popen(cmd, shell=True, **kwargs)
     out, err = p.communicate()
     if err:
         pass#logging.error(err)
@@ -68,7 +75,7 @@ def backup_postgres_database(database):
     f.close()
 
 
-def create_tunnel():
+def create_tunnel(port):
     return subprocess.Popen(["ssh -C -L 7777:localhost:5432 postgres@dev"],
                             shell=True,
                             stdout=subprocess.PIPE,
