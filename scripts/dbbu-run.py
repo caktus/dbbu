@@ -54,8 +54,8 @@ def main():
             data['host'] = '%s@%s' % (cfg.get(host, 'user'), host)
         data.update(shared)
         if cfg.has_option(host, 'postgres'):
-            databases = cfg.get(host, 'postgres')
-            if databases != 'ALL':
+            databases = cfg.get(host, 'postgres').strip()
+            if databases not in ('ALL', ''):
                 data['databases'] = databases.split(',')
             engines.append(dbbu.PostgreSQL(**data))
         if cfg.has_option(host, 'mysql'):
