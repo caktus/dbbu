@@ -31,7 +31,9 @@ class Backup(object):
         self.host = host
         self.sudo_user = sudo
         self.compression = compression
-        self.dest = dest
+        self.dest = os.path.join(dest, self.host)
+        if not os.path.exists(self.dest):
+            os.makedirs(self.dest)
 
     def execute(self, cmd, comm=True, **kwargs):
         if 'stderr' not in kwargs:
