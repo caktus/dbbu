@@ -4,29 +4,47 @@ import os
 import sys
 import time
 import string
-import logging
-import subprocess
 import ConfigParser
 from optparse import OptionParser
 import dbbu
 
 
-usage = "usage: %prog [options] cfg"
-parser = OptionParser(usage=usage)
-parser.add_option("-c", "--compression", default="gzip",
-                  help="compression algorithm (gzip, bzip2, etc.)")
-parser.add_option("-d", "--dest", default=os.getcwd(),
-                  help="destination directory, defaults to cwd")
+usage = """usage: %prog <path-to-configuration-file>
 
+Sample Configuration:
+
+[default]
+# compress backup files (defaults to gzip)
+compression: bzip2
+# backup destination directory (defaults to current working directory)
+dest: /backup/
+# chmod backup files, must start with 0 (defaults to 0600)
+fmod: 0755
+
+# host 1
+[example.com]
+# ssh user
+user: postgres
+# database specifications
+postgres: ALL
+mysql: ALL
+
+# host n
+[myserver.com]"""
+parser = OptionParser(usage=usage)
 
 def main():
     (options, cfg_path) = parser.parse_args()
-    defaults = {'fmod': '0600'}
+    if not cfg_path:
+        sys.stderr.write('Configuration file required!\n\n')
+        parser.print_usage()
+        sys.exit(-1)
+    defaults = {'fmod': '0600', 'compression': 'gzip', 'dest': os.getcwd()}
     cfg = ConfigParser.RawConfigParser(defaults)
     cfg.read(cfg_path)
     shared = {
-        'dest': options.dest,
-        'compression': options.compression,
+        'dest': cfg.get('default', 'dest'),
+        'compression': cfg.get('default', 'compression'),
         'fmod': string.atoi(cfg.get('default', 'fmod'), 8),
     }
     engines = []
