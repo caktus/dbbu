@@ -8,20 +8,18 @@ import sys
 import time
 import logging
 import subprocess
-from optparse import OptionParser
+
+
+__all__ = (
+    'Backup',
+    'PostgreSQL',
+    'MySQL',
+)
 
 
 DATABASES_TO_IGNORE = ('template0', )
 logging.basicConfig(stream=sys.stdout,
                     level=logging.DEBUG)
-
-
-usage = "usage: %prog [options] cfg"
-parser = OptionParser(usage=usage)
-parser.add_option("-c", "--compression", default="gzip",
-                  help="compression algorithm (gzip, bzip2, etc.)")
-parser.add_option("-d", "--dest", default=os.getcwd(),
-                  help="destination directory, defaults to cwd")
 
 
 class Backup(object):
@@ -115,31 +113,3 @@ class MySQL(Backup):
         fh = open(path, 'w+')
         self.remote(cmd, stdout=fh)
         fh.close()
-
-
-def main():
-    (options, cfg_path) = parser.parse_args()
-    
-    import ConfigParser
-    cfg = ConfigParser.RawConfigParser()
-    cfg.read(cfg_path)
-    shared = {
-        'dest': options.dest,
-        'compression': options.compression,
-    }
-    engines = []
-    for host in cfg.sections():
-        data = {'host': host}
-        if cfg.has_option(host, 'user'):
-            data['host'] = '%s@%s' % (cfg.get(host, 'user'), host)
-        data.update(shared)
-        if cfg.has_option(host, 'postgres'):
-            engines.append(PostgreSQL(**data))
-        if cfg.has_option(host, 'mysql'):
-            engines.append(MySQL(**data))
-    for engine in engines:
-        engine.run()
-
-
-if __name__ == "__main__":
-    sys.exit(main())
