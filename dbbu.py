@@ -129,10 +129,14 @@ def main():
     }
     engines = []
     for host in cfg.sections():
+        data = {'host': host}
+        if cfg.has_option(host, 'user'):
+            data['host'] = '%s@%s' % (cfg.get(host, 'user'), host)
+        data.update(shared)
         if cfg.has_option(host, 'postgres'):
-            engines.append(PostgreSQL(host=host, **shared))
+            engines.append(PostgreSQL(**data))
         if cfg.has_option(host, 'mysql'):
-            engines.append(MySQL(host=host, **shared))
+            engines.append(MySQL(**data))
     for engine in engines:
         engine.run()
 
