@@ -48,7 +48,7 @@ class Backup(object):
 
     def remote(self, cmd, **kwargs):
         args = {'host': self.host, 'cmd': cmd}
-        ssh = 'ssh -C {host} {cmd}'.format(**args)
+        ssh = 'ssh -C %(host)s %(cmd)s' % args
         return self.execute(ssh, **kwargs)
 
     def sudo(self, cmd):
@@ -84,17 +84,17 @@ class PostgreSQL(Backup):
         return out
 
     def backup_postgres_globals(self):
-        filename = 'globals.{0}'.format(self.compression)
+        filename = 'globals.%s' % self.compression
         path = os.path.join(self.dest, filename)
         fh = open(path, 'w+')
-        cmd = "pg_dumpall --globals-only | {0}".format(self.compression)
+        cmd = "pg_dumpall --globals-only | %s" % self.compression
         self.remote(cmd, stdout=fh)
         fh.close()
 
     def backup_postgres_database(self, database):
-        filename = '{0}.{1}'.format(database, self.compression)
+        filename = '%s.%s' % (database, self.compression)
         path = os.path.join(self.dest, filename)
-        cmd = "pg_dump -i {0} | {1}".format(database, self.compression)
+        cmd = "pg_dump -i %s | %s" % (database, self.compression)
         fh = open(path, 'w+')
         self.remote(cmd, stdout=fh)
         fh.close()
@@ -107,9 +107,9 @@ class MySQL(Backup):
         self.backup_all_databases()
     
     def backup_all_databases(self):
-        filename = 'mysqldumpall.sql.{0}'.format(self.compression)
+        filename = 'mysqldumpall.sql.%s' % self.compression
         path = os.path.join(self.dest, filename)
-        cmd = "mysqldump -uroot --all-databases | {0}".format(self.compression)
+        cmd = "mysqldump -uroot --all-databases | %s" % self.compression
         fh = open(path, 'w+')
         self.remote(cmd, stdout=fh)
         fh.close()
