@@ -17,7 +17,7 @@ __all__ = (
 )
 
 
-DATABASES_TO_IGNORE = ('template0', )
+DATABASES_TO_IGNORE = set(['template0'])
 logging.basicConfig(stream=sys.stdout,
                     level=logging.DEBUG)
 
@@ -25,12 +25,14 @@ logging.basicConfig(stream=sys.stdout,
 class Backup(object):
     """ Base backup class to handle common remote commands """
 
-    def __init__(self, host, dest, sudo='', compression='gzip', fmod=0600):
+    def __init__(self, host, dest, **kwargs):
         self.host = host
-        self.sudo_user = sudo
-        self.compression = compression
         self.dest = os.path.join(dest, self.host)
-        self.fmod = fmod
+        self.compression = kwargs.pop('compression', 'gzip')
+        self.sudo_user = kwargs.pop('sudo_user', '')
+        self.fmod = kwargs.pop('fmod', 0600)
+        databases = kwargs.pop('databases', [])
+        self.databases = set(databases)
         if not os.path.exists(self.dest):
             os.makedirs(self.dest)
 
@@ -71,8 +73,10 @@ class PostgreSQL(Backup):
 
     def run(self):
         self.backup_postgres_globals()
-        databases = filter(lambda x: x not in DATABASES_TO_IGNORE,
-                           self.get_postgres_databases())
+        databases = set(self.get_postgres_databases())
+        if self.databases:
+            databases = self.databases
+        databases -= DATABASES_TO_IGNORE
         logging.info('databases: %s', databases)
         for database in databases:
             logging.info('backing up %s' % database)

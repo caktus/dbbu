@@ -21,7 +21,7 @@ parser.add_option("-d", "--dest", default=os.getcwd(),
 
 def main():
     (options, cfg_path) = parser.parse_args()
-    defaults = {'fmod': 0600}
+    defaults = {'fmod': '0600'}
     cfg = ConfigParser.RawConfigParser(defaults)
     cfg.read(cfg_path)
     shared = {
@@ -36,6 +36,9 @@ def main():
             data['host'] = '%s@%s' % (cfg.get(host, 'user'), host)
         data.update(shared)
         if cfg.has_option(host, 'postgres'):
+            databases = cfg.get(host, 'postgres')
+            if databases != 'ALL':
+                data['databases'] = databases.split(',')
             engines.append(dbbu.PostgreSQL(**data))
         if cfg.has_option(host, 'mysql'):
             engines.append(dbbu.MySQL(**data))
