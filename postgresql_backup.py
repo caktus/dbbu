@@ -98,6 +98,21 @@ class PostgreSQL(Backup):
         fh.close()
 
 
+class MySQL(Backup):
+    """ MySQL backup recipe """
+    
+    def run(self):
+        self.backup_all_databases()
+    
+    def backup_all_databases(self):
+        filename = 'mysqldumpall.sql.{0}'.format(self.compression)
+        path = os.path.join(ROOT, filename)
+        cmd = "mysqldump -uroot --all-databases | {0}".format(self.compression)
+        fh = open(path, 'w+')
+        self.remote(cmd, stdout=fh)
+        fh.close()
+
+
 def main():
     (options, hosts) = parser.parse_args()
     if not hosts:
