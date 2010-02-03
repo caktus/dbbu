@@ -16,7 +16,7 @@ logging.basicConfig(stream=sys.stdout,
                     level=logging.DEBUG)
 
 
-usage = "usage: %prog [options] host-1 host-2 ... host-n"
+usage = "usage: %prog [options] cfg"
 parser = OptionParser(usage=usage)
 parser.add_option("-c", "--compression", default="gzip",
                   help="compression algorithm (gzip, bzip2, etc.)")
@@ -118,14 +118,23 @@ class MySQL(Backup):
 
 
 def main():
-    (options, hosts) = parser.parse_args()
-    if not hosts:
-        parser.print_usage()
-        return -1
-    for host in hosts:
-        pg = PostgreSQL(host=host, compression=options.compression,
-                        dest=options.dest)
-        pg.run()
+    (options, cfg_path) = parser.parse_args()
+    
+    import ConfigParser
+    cfg = ConfigParser.RawConfigParser()
+    cfg.read(cfg_path)
+    shared = {
+        'dest': options.dest,
+        'compression': options.compression,
+    }
+    engines = []
+    for host in cfg.sections():
+        if cfg.has_option(host, 'postgres'):
+            engines.append(PostgreSQL(host=host, **shared))
+        if cfg.has_option(host, 'mysql'):
+            engines.append(MySQL(host=host, **shared))
+    for engine in engines:
+        engine.run()
 
 
 if __name__ == "__main__":
