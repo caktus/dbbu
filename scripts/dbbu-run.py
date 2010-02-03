@@ -3,6 +3,7 @@
 import os
 import sys
 import time
+import string
 import logging
 import subprocess
 import ConfigParser
@@ -20,11 +21,13 @@ parser.add_option("-d", "--dest", default=os.getcwd(),
 
 def main():
     (options, cfg_path) = parser.parse_args()
-    cfg = ConfigParser.RawConfigParser()
+    defaults = {'fmod': 0600}
+    cfg = ConfigParser.RawConfigParser(defaults)
     cfg.read(cfg_path)
     shared = {
         'dest': options.dest,
         'compression': options.compression,
+        'fmod': string.atoi(cfg.get('default', 'fmod'), 8),
     }
     engines = []
     for host in cfg.sections():

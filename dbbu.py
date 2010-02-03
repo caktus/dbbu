@@ -25,11 +25,12 @@ logging.basicConfig(stream=sys.stdout,
 class Backup(object):
     """ Base backup class to handle common remote commands """
 
-    def __init__(self, host, dest, sudo='', compression='gzip'):
+    def __init__(self, host, dest, sudo='', compression='gzip', fmod=0600):
         self.host = host
         self.sudo_user = sudo
         self.compression = compression
         self.dest = os.path.join(dest, self.host)
+        self.fmod = fmod
         if not os.path.exists(self.dest):
             os.makedirs(self.dest)
 
@@ -58,6 +59,9 @@ class Backup(object):
         else:
             args = {'user': ''}
         return 'sudo %(user)s %(cmd)s'.format(args)
+    
+    def chmod(self, path):
+        os.chmod(path, self.fmod)
 
 
 class PostgreSQL(Backup):
@@ -90,6 +94,7 @@ class PostgreSQL(Backup):
         cmd = "pg_dumpall --globals-only | %s" % self.compression
         self.remote(cmd, stdout=fh)
         fh.close()
+        self.chmod(path)
 
     def backup_postgres_database(self, database):
         filename = '%s.%s' % (database, self.compression)
@@ -98,6 +103,7 @@ class PostgreSQL(Backup):
         fh = open(path, 'w+')
         self.remote(cmd, stdout=fh)
         fh.close()
+        self.chmod(path)
 
 
 class MySQL(Backup):
@@ -113,3 +119,4 @@ class MySQL(Backup):
         fh = open(path, 'w+')
         self.remote(cmd, stdout=fh)
         fh.close()
+        self.chmod(path)
