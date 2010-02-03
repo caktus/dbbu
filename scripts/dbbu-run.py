@@ -1,4 +1,5 @@
 #!/usr/bin/python
+
 import os
 import sys
 import time
@@ -6,7 +7,6 @@ import logging
 import subprocess
 import ConfigParser
 from optparse import OptionParser
-
 import dbbu
 
 
@@ -20,8 +20,6 @@ parser.add_option("-d", "--dest", default=os.getcwd(),
 
 def main():
     (options, cfg_path) = parser.parse_args()
-    
-    import ConfigParser
     cfg = ConfigParser.RawConfigParser()
     cfg.read(cfg_path)
     shared = {
@@ -43,4 +41,5 @@ def main():
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()
+    sys.exit(0)

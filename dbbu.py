@@ -102,10 +102,10 @@ class PostgreSQL(Backup):
 
 class MySQL(Backup):
     """ MySQL backup recipe """
-    
+
     def run(self):
         self.backup_all_databases()
-    
+
     def backup_all_databases(self):
         filename = 'mysqldumpall.sql.%s' % self.compression
         path = os.path.join(self.dest, filename)
