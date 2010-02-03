@@ -11,7 +11,6 @@ import subprocess
 from optparse import OptionParser
 
 
-ROOT = '/Users/copelco/Desktop/backup/'
 DATABASES_TO_IGNORE = ('template0', )
 logging.basicConfig(stream=sys.stdout,
                     level=logging.DEBUG)
@@ -21,15 +20,18 @@ usage = "usage: %prog [options] host-1 host-2 ... host-n"
 parser = OptionParser(usage=usage)
 parser.add_option("-c", "--compression", default="gzip",
                   help="compression algorithm (gzip, bzip2, etc.)")
+parser.add_option("-d", "--dest", default=os.getcwd(),
+                  help="destination directory, defaults to cwd")
 
 
 class Backup(object):
     """ Base backup class to handle common remote commands """
 
-    def __init__(self, host, sudo='', compression='gzip'):
+    def __init__(self, host, dest, sudo='', compression='gzip'):
         self.host = host
         self.sudo_user = sudo
         self.compression = compression
+        self.dest = dest
 
     def execute(self, cmd, comm=True, **kwargs):
         if 'stderr' not in kwargs:
@@ -83,7 +85,7 @@ class PostgreSQL(Backup):
 
     def backup_postgres_globals(self):
         filename = 'globals.{0}'.format(self.compression)
-        path = os.path.join(ROOT, filename)
+        path = os.path.join(self.dest, filename)
         fh = open(path, 'w+')
         cmd = "pg_dumpall --globals-only | {0}".format(self.compression)
         self.remote(cmd, stdout=fh)
@@ -91,7 +93,7 @@ class PostgreSQL(Backup):
 
     def backup_postgres_database(self, database):
         filename = '{0}.{1}'.format(database, self.compression)
-        path = os.path.join(ROOT, filename)
+        path = os.path.join(self.dest, filename)
         cmd = "pg_dump -i {0} | {1}".format(database, self.compression)
         fh = open(path, 'w+')
         self.remote(cmd, stdout=fh)
@@ -106,7 +108,7 @@ class MySQL(Backup):
     
     def backup_all_databases(self):
         filename = 'mysqldumpall.sql.{0}'.format(self.compression)
-        path = os.path.join(ROOT, filename)
+        path = os.path.join(self.dest, filename)
         cmd = "mysqldump -uroot --all-databases | {0}".format(self.compression)
         fh = open(path, 'w+')
         self.remote(cmd, stdout=fh)
@@ -119,7 +121,8 @@ def main():
         parser.print_usage()
         return -1
     for host in hosts:
-        pg = PostgreSQL(host=host, compression=options.compression)
+        pg = PostgreSQL(host=host, compression=options.compression,
+                        dest=options.dest)
         pg.run()
 
 
