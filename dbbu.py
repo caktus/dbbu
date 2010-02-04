@@ -16,10 +16,8 @@ __all__ = (
     'MySQL',
 )
 
-
+logger = logging.getLogger('dbbu')
 DATABASES_TO_IGNORE = set(['template0'])
-logging.basicConfig(stream=sys.stdout,
-                    level=logging.DEBUG)
 
 
 class Backup(object):
@@ -35,16 +33,17 @@ class Backup(object):
         self.databases = set(databases)
         if not os.path.exists(self.dest):
             os.makedirs(self.dest)
+        self.logger = logging.getLogger('dbbu.%s' % self.host.replace('.', '-'))
 
     def execute(self, cmd, comm=True, **kwargs):
         if 'stderr' not in kwargs:
             kwargs['stderr'] = subprocess.PIPE
-        logging.debug(cmd)
+        self.logger.debug(cmd)
         p = subprocess.Popen(cmd, shell=True, **kwargs)
         if comm:
             out, err = p.communicate()
             if err:
-                logging.error(err)
+                self.logger.error(err)
             p.out = out
             p.err = err
         return p
@@ -64,6 +63,8 @@ class Backup(object):
     
     def chmod(self, path):
         os.chmod(path, self.fmod)
+    
+    
 
 
 class PostgreSQL(Backup):
@@ -77,9 +78,9 @@ class PostgreSQL(Backup):
         if self.databases:
             databases = self.databases
         databases -= DATABASES_TO_IGNORE
-        logging.info('databases: %s', databases)
+        self.logger.info('databases: %s', databases)
         for database in databases:
-            logging.info('backing up %s' % database)
+            self.logger.info('backing up %s' % database)
             self.backup_postgres_database(database)
 
     def get_postgres_databases(self):

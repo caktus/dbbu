@@ -4,6 +4,8 @@ import os
 import sys
 import time
 import string
+import logging
+import logging.handlers
 import ConfigParser
 from optparse import OptionParser
 import dbbu
@@ -33,15 +35,44 @@ mysql: ALL
 [myserver.com]"""
 parser = OptionParser(usage=usage)
 
+ALLOWED_LEVELS = ('NOTSET', 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL')
+logger = logging.getLogger('dbbu')
+formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)-8s %(message)s',
+                              datefmt='%a, %d %b %Y %H:%M:%S')
+
+def setup_logging(cfg):
+    log_level = cfg.get('default', 'log_level')
+    if log_level not in ALLOWED_LEVELS:
+        sys.stderr.write('Invalid log level\n\n')
+        log_level = logging.NOTSET
+    else:
+        log_level = getattr(logging, log_level)
+    logger.setLevel(log_level)
+    
+    if cfg.has_option('default', 'log_file'):
+        log_file = cfg.get('default', 'log_file')
+        handler = logging.handlers.RotatingFileHandler(log_file,
+                                                       backupCount=5)
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+    else:
+        handler = logging.StreamHandler()
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+
 def main():
     (options, cfg_path) = parser.parse_args()
     if not cfg_path:
         sys.stderr.write('Configuration file required!\n\n')
         parser.print_usage()
         sys.exit(-1)
-    defaults = {'fmod': '0600', 'compression': 'gzip', 'dest': os.getcwd()}
+    defaults = {'fmod': '0600',
+                'compression': 'gzip',
+                'dest': os.getcwd(),
+                'log_level': 'INFO'}
     cfg = ConfigParser.RawConfigParser(defaults)
     cfg.read(cfg_path)
+    setup_logging(cfg)
     shared = {
         'dest': cfg.get('default', 'dest'),
         'compression': cfg.get('default', 'compression'),
