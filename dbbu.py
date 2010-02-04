@@ -33,7 +33,8 @@ class Backup(object):
         self.databases = set(databases)
         if not os.path.exists(self.dest):
             os.makedirs(self.dest)
-        self.logger = logging.getLogger('dbbu.%s' % self.host.replace('.', '-'))
+        self.logger = \
+            logging.getLogger('dbbu.%s' % self.host.replace('.', '-'))
 
     def execute(self, cmd, comm=True, **kwargs):
         if 'stderr' not in kwargs:
@@ -60,11 +61,9 @@ class Backup(object):
         else:
             args = {'user': ''}
         return 'sudo %(user)s %(cmd)s'.format(args)
-    
+
     def chmod(self, path):
         os.chmod(path, self.fmod)
-    
-    
 
 
 class PostgreSQL(Backup):

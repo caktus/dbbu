@@ -37,8 +37,10 @@ parser = OptionParser(usage=usage)
 
 ALLOWED_LEVELS = ('NOTSET', 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL')
 logger = logging.getLogger('dbbu')
-formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)-8s %(message)s',
-                              datefmt='%a, %d %b %Y %H:%M:%S')
+formatter = \
+    logging.Formatter('%(asctime)s %(name)s %(levelname)-8s %(message)s',
+                      datefmt='%a, %d %b %Y %H:%M:%S')
+
 
 def setup_logging(cfg):
     log_level = cfg.get('default', 'log_level')
@@ -48,7 +50,7 @@ def setup_logging(cfg):
     else:
         log_level = getattr(logging, log_level)
     logger.setLevel(log_level)
-    
+
     if cfg.has_option('default', 'log_file'):
         log_file = cfg.get('default', 'log_file')
         handler = logging.handlers.RotatingFileHandler(log_file,
@@ -59,6 +61,7 @@ def setup_logging(cfg):
         handler = logging.StreamHandler()
         handler.setFormatter(formatter)
         logger.addHandler(handler)
+
 
 def main():
     (options, cfg_path) = parser.parse_args()
