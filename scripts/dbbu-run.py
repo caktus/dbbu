@@ -86,6 +86,8 @@ def main():
         data = {'host': host}
         if cfg.has_option(host, 'user'):
             data['host'] = '%s@%s' % (cfg.get(host, 'user'), host)
+        if cfg.has_option(host, 'sudo_user'):
+            data['sudo_user'] = cfg.get(host, 'sudo_user')
         data.update(shared)
         if cfg.has_option(host, 'postgres'):
             databases = cfg.get(host, 'postgres').strip()

@@ -50,17 +50,17 @@ class Backup(object):
         return p
 
     def remote(self, cmd, **kwargs):
-        args = {'host': self.host, 'cmd': cmd}
-        ssh = 'ssh -C %(host)s %(cmd)s' % args
-        return self.execute(ssh, **kwargs)
+        if self.sudo_user:
+            cmd = self.sudo(cmd)
+        remote_cmd = ['ssh -C', self.host, cmd]
+        return self.execute(' '.join(remote_cmd), **kwargs)
 
     def sudo(self, cmd):
-        args = {'cmd': cmd}
+        sudo_cmd = ['sudo']
         if self.sudo_user:
-            args['user'] = ' -u %(user)s '.format({'user': self.sudo_user})
-        else:
-            args = {'user': ''}
-        return 'sudo %(user)s %(cmd)s'.format(args)
+            sudo_cmd.append('-u %s' % self.sudo_user)
+        sudo_cmd.append(cmd)
+        return ' '.join(sudo_cmd)
 
     def chmod(self, path):
         os.chmod(path, self.fmod)
