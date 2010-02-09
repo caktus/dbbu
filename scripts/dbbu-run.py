@@ -11,28 +11,7 @@ from optparse import OptionParser
 import dbbu
 
 
-usage = """usage: %prog <path-to-configuration-file>
-
-Sample Configuration:
-
-[default]
-# compress backup files (defaults to gzip)
-compression: bzip2
-# backup destination directory (defaults to current working directory)
-dest: /backup/
-# chmod backup files, must start with 0 (defaults to 0600)
-fmod: 0755
-
-# host 1
-[example.com]
-# ssh user
-user: postgres
-# database specifications
-postgres: ALL
-mysql: ALL
-
-# host n
-[myserver.com]"""
+usage = """usage: %prog <path-to-configuration-file>"""
 parser = OptionParser(usage=usage)
 
 ALLOWED_LEVELS = ('NOTSET', 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL')
