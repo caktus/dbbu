@@ -76,6 +76,7 @@ def main():
             if cfg.has_option(host, 'postgres_sudo_user'):
                 pg_data['sudo_user'] = cfg.get(host, 'postgres_sudo_user')
             pg_data.update(data)
+            print pg_data
             engines.append(dbbu.PostgreSQL(**pg_data))
         if cfg.has_option(host, 'mysql'):
             engines.append(dbbu.MySQL(**data))

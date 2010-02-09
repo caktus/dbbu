@@ -25,7 +25,7 @@ class Backup(object):
 
     def __init__(self, host, dest, **kwargs):
         self.host = host
-        self.dest = os.path.join(dest, self.host)
+        self.dest = dest
         self.compression = kwargs.pop('compression', 'gzip')
         self.sudo_user = kwargs.pop('sudo_user', '')
         self.fmod = kwargs.pop('fmod', 0600)
@@ -71,6 +71,10 @@ class PostgreSQL(Backup):
     PostgreSQL backup class to dump globals and all databases individually
     """
 
+    def __init__(self, host, dest, **kwargs):
+        dest = os.path.join(dest, host, 'postgres')
+        super(PostgreSQL, self).__init__(host, dest, **kwargs)
+
     def run(self):
         self.backup_postgres_globals()
         databases = set(self.get_postgres_databases())
@@ -112,6 +116,10 @@ class PostgreSQL(Backup):
 
 class MySQL(Backup):
     """ MySQL backup recipe """
+
+    def __init__(self, host, dest, **kwargs):
+        dest = os.path.join(dest, host, 'mysql')
+        super(MySQL, self).__init__(host, dest, **kwargs)
 
     def run(self):
         self.backup_all_databases()
