@@ -77,7 +77,7 @@ class PostgreSQL(Backup):
         if self.databases:
             databases = self.databases
         databases -= DATABASES_TO_IGNORE
-        self.logger.info('databases: %s', databases)
+        self.logger.debug('databases: %s', databases)
         for database in databases:
             self.logger.info('backing up %s' % database)
             self.backup_postgres_database(database)
@@ -117,9 +117,10 @@ class MySQL(Backup):
         self.backup_all_databases()
 
     def backup_all_databases(self):
+        self.logger.info('backing up all MySQL databases')
         filename = 'mysqldumpall.sql.%s' % self.compression
         path = os.path.join(self.dest, filename)
-        cmd = "mysqldump -uroot --all-databases | %s" % self.compression
+        cmd = "mysqldump --all-databases | %s" % self.compression
         fh = open(path, 'w+')
         self.remote(cmd, stdout=fh)
         fh.close()

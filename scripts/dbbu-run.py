@@ -69,10 +69,14 @@ def main():
             data['sudo_user'] = cfg.get(host, 'sudo_user')
         data.update(shared)
         if cfg.has_option(host, 'postgres'):
+            pg_data = {}
             databases = cfg.get(host, 'postgres').strip()
             if databases not in ('ALL', ''):
-                data['databases'] = databases.split(',')
-            engines.append(dbbu.PostgreSQL(**data))
+                pg_data['databases'] = databases.split(',')
+            if cfg.has_option(host, 'postgres_sudo_user'):
+                pg_data['sudo_user'] = cfg.get(host, 'postgres_sudo_user')
+            pg_data.update(data)
+            engines.append(dbbu.PostgreSQL(**pg_data))
         if cfg.has_option(host, 'mysql'):
             engines.append(dbbu.MySQL(**data))
     for engine in engines:
