@@ -26,6 +26,7 @@ class Backup(object):
     def __init__(self, host, dest, **kwargs):
         self.host = host
         self.dest = dest
+        self.user = kwargs.pop('user', None)
         self.compression = kwargs.pop('compression', 'gzip')
         self.sudo_user = kwargs.pop('sudo_user', '')
         self.fmod = kwargs.pop('fmod', 0600)
@@ -52,7 +53,10 @@ class Backup(object):
     def remote(self, cmd, **kwargs):
         if self.sudo_user:
             cmd = self.sudo(cmd)
-        remote_cmd = ['ssh -C', self.host, cmd]
+        remote_cmd = ['ssh -C']
+        if self.user:
+            remote_cmd.extend(['-l', self.user])
+        remote_cmd.extend([self.host, cmd])
         return self.execute(' '.join(remote_cmd), **kwargs)
 
     def sudo(self, cmd):

@@ -61,10 +61,11 @@ def main():
         'fmod': string.atoi(cfg.get('default', 'fmod'), 8),
     }
     engines = []
-    for host in cfg.sections():
-        data = {'host': host}
+    hosts = [s for s in cfg.sections() if s.startswith('host_')]
+    for host in hosts:
+        data = {'host': host[5:]}
         if cfg.has_option(host, 'user'):
-            data['host'] = '%s@%s' % (cfg.get(host, 'user'), host)
+            data['user'] = cfg.get(host, 'user')
         if cfg.has_option(host, 'sudo_user'):
             data['sudo_user'] = cfg.get(host, 'sudo_user')
         data.update(shared)
@@ -76,7 +77,6 @@ def main():
             if cfg.has_option(host, 'postgres_sudo_user'):
                 pg_data['sudo_user'] = cfg.get(host, 'postgres_sudo_user')
             pg_data.update(data)
-            print pg_data
             engines.append(dbbu.PostgreSQL(**pg_data))
         if cfg.has_option(host, 'mysql'):
             engines.append(dbbu.MySQL(**data))
