@@ -96,8 +96,7 @@ class PostgreSQL(Backup):
         return [line for line in proc.out.split('\n') if line != '']
 
     def backup_postgres_globals(self):
-        filename = 'globals.%s' % self.compression
-        path = os.path.join(self.dest, filename)
+        path = os.path.join(self.dest, 'globals.%s' % self.compression)
         fh = open(path, 'w+')
         cmd = "pg_dumpall --globals-only | %s" % self.compression
         self.remote(cmd, stdout=fh)
@@ -105,8 +104,7 @@ class PostgreSQL(Backup):
         self.chmod(path)
 
     def backup_postgres_database(self, database):
-        filename = '%s.%s' % (database, self.compression)
-        path = os.path.join(self.dest, filename)
+        path = os.path.join(self.dest, '%s.%s' % (database, self.compression))
         cmd = "pg_dump -i %s | %s" % (database, self.compression)
         fh = open(path, 'w+')
         self.remote(cmd, stdout=fh)
