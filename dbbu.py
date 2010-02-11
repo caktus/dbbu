@@ -87,13 +87,9 @@ class PostgreSQL(Backup):
             self.backup_postgres_database(database)
 
     def get_postgres_databases(self):
-        psql = "psql -q -c \\'SELECT datname FROM pg_database\\'"
-        proc = self.remote(psql, stdout=subprocess.PIPE)
-        out = proc.out
-        out = out.split('\n')
-        out = out[2:len(out) - 3]
-        out = map(lambda x: x.strip(), out)
-        return out
+        proc = self.remote("psql -l | awk '/^ [^ ]/ { print $1 } '",
+                           stdout=subprocess.PIPE)
+        return [line for line in proc.out.split('\n') if line != '']
 
     def backup_postgres_globals(self):
         filename = 'globals.%s' % self.compression
