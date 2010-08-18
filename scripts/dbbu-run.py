@@ -62,6 +62,10 @@ def main():
     }
     engines = []
     hosts = [s for s in cfg.sections() if s.startswith('host_')]
+    if not hosts:
+        err = u'No hosts defined. Hosts are of the form host_example.org for a given domain example.org\n\n'
+        logger.error(err)
+        sys.stderr.write(err)
     for host in hosts:
         data = {'host': host[5:]}
         if cfg.has_option(host, 'user'):

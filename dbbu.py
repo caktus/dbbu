@@ -8,6 +8,8 @@ import sys
 import time
 import logging
 import subprocess
+#import pdb
+#pdb.set_trace()
 
 
 __all__ = (
@@ -57,6 +59,7 @@ class Backup(object):
         if self.user:
             remote_cmd.extend(['-l', self.user])
         remote_cmd.extend([self.host, cmd])
+        self.logger.debug(remote_cmd)
         return self.execute(' '.join(remote_cmd), **kwargs)
 
     def sudo(self, cmd):
@@ -64,6 +67,7 @@ class Backup(object):
         if self.sudo_user:
             sudo_cmd.append('-u %s' % self.sudo_user)
         sudo_cmd.append(cmd)
+        self.logger.debug(sudo_cmd)
         return ' '.join(sudo_cmd)
 
     def chmod(self, path):
