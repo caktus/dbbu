@@ -65,7 +65,7 @@ class Backup(object):
     def sudo(self, cmd):
         sudo_cmd = ['sudo']
         if self.sudo_user:
-            sudo_cmd.append('-u %s' % self.sudo_user)
+            sudo_cmd.append('-iu %s' % self.sudo_user)
         sudo_cmd.append(cmd)
         self.logger.debug(sudo_cmd)
         return ' '.join(sudo_cmd)
