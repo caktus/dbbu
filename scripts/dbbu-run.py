@@ -70,6 +70,8 @@ def main():
         data = {'host': host[5:]}
         if cfg.has_option(host, 'user'):
             data['user'] = cfg.get(host, 'user')
+        if cfg.has_option(host, 'ssh_port'):
+            data['ssh_port'] = cfg.get(host, 'ssh_port')
         if cfg.has_option(host, 'sudo_user'):
             data['sudo_user'] = cfg.get(host, 'sudo_user')
         data.update(shared)

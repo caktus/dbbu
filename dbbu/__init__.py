@@ -32,6 +32,7 @@ class Backup(object):
         self.compression = kwargs.pop('compression', 'gzip')
         self.sudo_user = kwargs.pop('sudo_user', '')
         self.fmod = kwargs.pop('fmod', 0600)
+        self.ssh_port = kwargs.pop('ssh_port', None)
         databases = kwargs.pop('databases', [])
         self.databases = set(databases)
         if not os.path.exists(self.dest):
@@ -58,6 +59,8 @@ class Backup(object):
         remote_cmd = ['ssh -C']
         if self.user:
             remote_cmd.extend(['-l', self.user])
+        if self.ssh_port:
+            remote_cmd.extend(['-p', self.ssh_port])
         remote_cmd.extend([self.host, cmd])
         self.logger.debug(remote_cmd)
         return self.execute(' '.join(remote_cmd), **kwargs)
